@@ -1,10 +1,10 @@
-package lucasTp1.oficina;
+package lucas.TP1.oficina;
 
 public class Automovel {
 	
 	private String marca, modelo, anoModelo, combustivel, placa;
-	private Double quilometragem;
-	public Automovel(String marca, String modelo, String anoModelo, String combustivel, String placa, Double quilometragem) {
+	private Integer quilometragem;
+	public Automovel(String marca, String modelo, String anoModelo, String combustivel, String placa, Integer quilometragem) {
 		this.marca = marca;
 		this.modelo = modelo;
 		this.anoModelo = anoModelo;
@@ -42,10 +42,10 @@ public class Automovel {
 	public void setPlaca(String placa) {
 		this.placa = placa;
 	}
-	public Double getQuilometragem() {
+	public Integer getQuilometragem() {
 		return quilometragem;
 	}
-	public void setQuilometragem(Double quilometragem) {
+	public void setQuilometragem(Integer quilometragem) {
 		this.quilometragem = quilometragem;
 	}
 	

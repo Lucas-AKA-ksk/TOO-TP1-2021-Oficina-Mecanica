@@ -1,4 +1,4 @@
-package lucasTp1.oficina;
+package lucas.TP1.oficina;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,5 +70,12 @@ public class Cliente {
 	 */
 	public void adicionarAutomovel(Automovel automovel) {
 		this.automoveisList.add(automovel);
+	}
+	
+	/**
+	 * Obtem o número de automóveis do cliente
+	 */
+	public int obterNumeroDeAutomoveis() {
+		return automoveisList.size();
 	}
 }
