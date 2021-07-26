@@ -37,7 +37,18 @@ public class Oficina {
 	 * Pesquisa o nome de um cliente na lista de clientes.
 	 * Retorna o cliente se o nome estiver cadastrado ou null caso contrário.
 	 */
-	public Cliente pesquisarCliente(String nome) {
+	public Cliente pesquisarCPFCliente(String cpf) {
+		for (Cliente cliente : clientesList) 
+			if (cpf.equalsIgnoreCase(cliente.getCfp()))
+					return cliente;
+		return null;
+	}
+	
+	/**
+	 * Pesquisa o CPF de um cliente na lista de clientes.
+	 * Retorna o cliente se o CPF estiver cadastrado ou null caso contrário.
+	 */
+	public Cliente pesquisarNomeCliente(String nome) {
 		for (Cliente cliente : clientesList) 
 			if (nome.equalsIgnoreCase(cliente.getNome()))
 					return cliente;

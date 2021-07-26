@@ -1,11 +1,13 @@
 package lucas.TP1.oficina.gui;
 
 import static javax.swing.JOptionPane.ERROR_MESSAGE;
+import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
 import static javax.swing.JOptionPane.showMessageDialog;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
@@ -18,11 +20,14 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
 import lucas.TP1.oficina.Automovel;
+import lucas.TP1.oficina.Cliente;
 import lucas.TP1.oficina.Oficina;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.JTextArea;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 
 @SuppressWarnings("serial")
 public class IgCadastrarCliente extends JDialog {
@@ -39,19 +44,6 @@ public class IgCadastrarCliente extends JDialog {
 	private JComboBox<String> marcaComboBox;
 	private JComboBox<String> codigoComboBox;
 	private List<Automovel> listaDeAutomoveisTemporaria;
-	
-//	/**
-//	 * Launch the application.
-//	 */
-//	public static void main(String[] args) {
-//		try {
-//			IgCadastrarCliente dialog = new IgCadastrarCliente();
-//			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-//			dialog.setVisible(true);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//	}
 
 	/**
 	 * Create the dialog.
@@ -59,19 +51,21 @@ public class IgCadastrarCliente extends JDialog {
 	 */
 	public IgCadastrarCliente(Oficina oficina) {
 		
+		this.listaDeAutomoveisTemporaria = new ArrayList<>();
+		
 		// Desabilita o redimensionamento
 		setResizable(false);
 		
 		// Título
 		setTitle("Cliente e Automóvel");
-		setSize(770, 488);
+		setSize(714, 488);
 		getContentPane().setLayout(new MigLayout("", "[390.00px,grow][390.00px,grow]", "[38px][][][grow][][][][][][grow][][][][][][][][]"));
 		
 		// Painel de Clientes
 		JPanel clientePanel = new JPanel();
 		clientePanel.setBorder(new TitledBorder(null, "Cliente", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(59, 59, 59)));
 		getContentPane().add(clientePanel, "cell 0 0 1 17,grow");
-		clientePanel.setLayout(new MigLayout("", "[136.00][204.00]", "[119.00][][][][grow]"));
+		clientePanel.setLayout(new MigLayout("", "[52.00][250.00,fill]", "[119.00][][][][grow]"));
 			
 		// Subpainel de pesquisa de cliente
 		JPanel pesquisaClientePanel = new JPanel();
@@ -80,7 +74,7 @@ public class IgCadastrarCliente extends JDialog {
 		pesquisaClientePanel.setLayout(new MigLayout("", "[][grow]", "[][][]"));
 				
 		// Label de CPF
-		JLabel cpfLabel = new JLabel("CPF");
+		JLabel cpfLabel = new JLabel("CPF:");
 		cpfLabel.setDisplayedMnemonic(KeyEvent.VK_F);
 		pesquisaClientePanel.add(cpfLabel, "cell 0 0,alignx left");
 		cpfLabel.setLabelFor(cpfTextField);
@@ -89,6 +83,7 @@ public class IgCadastrarCliente extends JDialog {
 		cpfTextField = new JTextField();
 		pesquisaClientePanel.add(cpfTextField, "cell 1 0,alignx left");
 		cpfTextField.setColumns(10);
+		cpfTextField.addActionListener((e) -> pesquisarCliente(oficina) );
 				
 		// Label do Nome do CLiente
 		JLabel nomeLabel = new JLabel("Nome: ");
@@ -100,9 +95,15 @@ public class IgCadastrarCliente extends JDialog {
 		nomeTextField = new JTextField();
 		pesquisaClientePanel.add(nomeTextField, "cell 1 1,growx");
 		nomeTextField.setColumns(10);
+		nomeTextField.addActionListener((e) -> pesquisarCliente(oficina) );
 				
 		// Botão Pesquisar
 		JButton pesquisarButton = new JButton("Pesquisar");
+		pesquisarButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				pesquisarCliente(oficina);
+			}
+		});
 		pesquisarButton.setMnemonic(KeyEvent.VK_P);
 		pesquisaClientePanel.add(pesquisarButton, "cell 1 2,alignx right");
 				
@@ -153,6 +154,12 @@ public class IgCadastrarCliente extends JDialog {
 		
 		// ComboBox do código do automóvel
 		codigoComboBox = new JComboBox<>();
+		codigoComboBox.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange() == ItemEvent.SELECTED)
+					preencherCamposDoAutomovel(codigoComboBox.getSelectedIndex());
+			}
+		});
 		automovelPanel.add(codigoComboBox, "cell 1 0,alignx left");
 			
 		// Label da Marca do automóvel
@@ -293,7 +300,7 @@ public class IgCadastrarCliente extends JDialog {
 		JButton gravarButton = new JButton("Gravar");
 		gravarButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				cadastrarCliente();
+				cadastrarCliente(oficina);
 			}
 		});
 		gravarButton.setMnemonic(KeyEvent.VK_G);
@@ -301,11 +308,21 @@ public class IgCadastrarCliente extends JDialog {
 			
 		// Botão Gerar Ordem de Serviço
 		JButton ordemServicoButton = new JButton("Gerar Ordem de Serviço");
+		ordemServicoButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new IgOrdemDeServico();
+			}
+		});
 		ordemServicoButton.setMnemonic(KeyEvent.VK_O);
 		buttonPane.add(ordemServicoButton);
 			
 		// Botão Cancelar
 		JButton cancelarButton = new JButton("Cancelar");
+		cancelarButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
 		buttonPane.add(cancelarButton);
 			
 		
@@ -321,8 +338,9 @@ public class IgCadastrarCliente extends JDialog {
 
 	/**
 	 * Obtem os dados do cliente e de seus carros da interface gráfica e os cadastra
+	 * @param oficina 
 	 */
-	private void cadastrarCliente() {
+	private void cadastrarCliente(Oficina oficina) {
 
 		String cpf = cpfTextField.getText(),
 				nomeCliente = nomeTextField.getText(), 
@@ -330,87 +348,236 @@ public class IgCadastrarCliente extends JDialog {
 				telefone = telefoneTextField.getText(),
 				endereco = enderecoTextArea.getText();
 		
-		// Verificações dos campos com dados do Cliente quanto a se então em branco ou não
-		if(cpf.isBlank()) {
-			showMessageDialog(this, "Você deve preencher o CPF do cliente.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
-		}
-		if(nomeCliente.isBlank()) {
-			showMessageDialog(this, "Você deve preencher o Nome do cliente.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
-		}
-		if(email.isBlank()) {
-			showMessageDialog(this, "Você deve preencher o Email do cliente.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
-		}
-		if(telefone.isBlank()) {
-			showMessageDialog(this, "Você deve preencher o Telefone do cliente.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
-		}
-		if(endereco.isBlank()) {
-			showMessageDialog(this, "Você deve preencher o Endereço do cliente.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
-		}
+		Cliente novoCliente;
 		
-		// Verificações de formato dos Campos CPF, telefone e email
-		if(!validarString(cpf,"([0-9]{3}[\\.]?[0-9]{3}[\\.]?[0-9]{3}[-]?[0-9]{2})")) {
-			showMessageDialog(this, "CPF inválido.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
-		}
-		if(!validarString(telefone,"\\([0-9]{2}\\)[0-9]{4,5}-[0-9]{4}")) {
-			showMessageDialog(this, "Telefone inválido.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
-		}
-		if(!validarString(email,"")) { // TODO adicionar regex do email
-			showMessageDialog(this, "Email inválido.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
-		}
+		if(verificarDadosCliente(cpf, nomeCliente, email, telefone, endereco)) {
+				
+			// TODO verificar chave única CPF ou nem? 
+			novoCliente = new Cliente(nomeCliente, cpf, email, telefone, endereco);
 			
-		// TODO verificar se a lista de automoveis temporaria está vazia
+			/* Verificar se a lista de automoveis temporaria não está vazia,
+			 * se não estiver, adiciona o cliente a lista de clientes e adiciona
+			 * cada automóvel da lista temporária na lista de automóveis do cliente */
+			if(!listaDeAutomoveisTemporaria.isEmpty()) {
+				
+				for(Automovel automovel : listaDeAutomoveisTemporaria) {
+					novoCliente.adicionarAutomovel(automovel);
+				}
+				
+				oficina.cadastrarCliente(novoCliente);
+				
+				// Esvaziar lista temporária e o campo código
+				listaDeAutomoveisTemporaria.clear();
+				codigoComboBox.removeAllItems();
+			}
+			/* Caso a lista temporária de automóveis esteja vazia, checa os campos
+			 * de dados de automóvel, e caso tenham dados preenchidos, cria um novo
+			 * objeto Automovel para relacionar ao Cliente, pois é obrigatório que o
+			 * mesmo tenha pelo menos um automóvel cadastrado */
+			else {
+				String codigo = String.format("A%d", listaDeAutomoveisTemporaria.size() + 1),
+						marca = marcaComboBox.getItemAt(marcaComboBox.getSelectedIndex()),
+						modelo = modeloTextField.getText(),
+						anoModelo = anoModeloComboBox.getItemAt(anoModeloComboBox.getSelectedIndex()),
+						combustivel = combustivelComboBox.getItemAt(combustivelComboBox.getSelectedIndex()),
+						quilometragem = quilometragemTextField.getText(),
+						placa = placaTextField.getText();
+				
+				if(verificarDadosAutomovel(modelo, quilometragem, placa)) {
+					novoCliente.adicionarAutomovel(new Automovel(codigo, marca, modelo, anoModelo, combustivel, placa, Integer.valueOf(quilometragem)));
+					oficina.cadastrarCliente(novoCliente);
+				}
+			}
+		}
 	}
 	
 	/**
 	 * Obtem dados do painel de Automóveis e os adiciona em uma lista de automóveis temporária
 	 */
 	private void adicionarAutomovelNaListaTemporaria() {
-		// TODO Auto-generated method stub
-		String marca = marcaComboBox.getItemAt(marcaComboBox.getSelectedIndex()),
+		
+		String codigo = String.format("A%d", listaDeAutomoveisTemporaria.size() + 1),
+				marca = marcaComboBox.getItemAt(marcaComboBox.getSelectedIndex()),
 				modelo = modeloTextField.getText(),
 				anoModelo = anoModeloComboBox.getItemAt(anoModeloComboBox.getSelectedIndex()),
 				combustivel = combustivelComboBox.getItemAt(combustivelComboBox.getSelectedIndex()),
-				quilometragemString = quilometragemTextField.getText(),
+				quilometragem = quilometragemTextField.getText(),
 				placa = placaTextField.getText();
-		Integer quilometragem;
+		
+		if(verificarDadosAutomovel(modelo, quilometragem, placa)) {
+			listaDeAutomoveisTemporaria.add(new Automovel(codigo, marca, modelo, anoModelo, combustivel, placa, Integer.valueOf(quilometragem)));
+			showMessageDialog(this, "Carro adicionado a lista de pré cadastro\nconfirme o cadastro do cliente para concluir a operação.", "Cadastrar Cliente", INFORMATION_MESSAGE);		}
+	}
+	
+	/**
+	 * 
+	 * @param oficina
+	 */
+	private void pesquisarCliente(Oficina oficina) {
+		
+		String cpf = cpfTextField.getText(),
+				nomeCliente = nomeTextField.getText();
+		Cliente clientePesquisado;
+		
+		if(!cpf.isBlank())
+			clientePesquisado = oficina.pesquisarCPFCliente(cpf);
+		else if(!nomeCliente.isBlank())
+			clientePesquisado = oficina.pesquisarNomeCliente(nomeCliente);
+		else {
+			showMessageDialog(this, "Campos de CPF e nome vazios.", "Cadastrar Cliente", ERROR_MESSAGE);
+			return;
+		}
+		
+		if(clientePesquisado != null)
+			preencherCamposDaTela(clientePesquisado);
+		else
+			showMessageDialog(this, "Cliente não encontrado", "Cadastrar Cliente", ERROR_MESSAGE);
+		
+	}
+	
+	/**
+	 * Preenche os campos dos dados do cliente, 
+	 * @param cliente
+	 */
+	private void preencherCamposDaTela(Cliente cliente) {
+		
+		preencherCamposDoCliente(cliente);
+		
+		// Esvazia o ComboBox de códigos
+		codigoComboBox.removeAllItems();
+		
+		// Preenche a lista temporária com cópias dos objetos Automovel
+		for(Automovel automovel : cliente.getAutomoveisList())
+			listaDeAutomoveisTemporaria.add(automovel.copy());
+		
+		// Preenche o ComboBox de códigos com os códigos dos carros do cliente
+		for(Automovel automovel : listaDeAutomoveisTemporaria)
+			codigoComboBox.addItem(automovel.getCodigo());
+		
+		preencherCamposDoAutomovel(0);
+		
+	}
+	
+	/**
+	 * Configura os campos dos dados do cliente com os dados adquiridos
+	 * do parâmetro cliente.
+	 * @param cliente
+	 */
+	private void preencherCamposDoCliente(Cliente cliente){
+		
+		cpfTextField.setText(cliente.getCfp());
+		nomeTextField.setText(cliente.getNome());
+		emailTextField.setText(cliente.getEmail());
+		telefoneTextField.setText(cliente.getTelefone());
+		enderecoTextArea.setText(cliente.getEndereco());
+	}
+	
+	/**
+	 * Configura os campos dos dados do automóvel com as informações do automóvel
+	 * no index especificado da listaDeAutomoveisTemporaria.
+	 * @param index index de listaDeAutomoveisTemporaria com as informações parapreencher os campos
+	 */
+	private void preencherCamposDoAutomovel(int index){
+		
+		marcaComboBox.setSelectedItem(listaDeAutomoveisTemporaria.get(index).getMarca());
+		modeloTextField.setText(listaDeAutomoveisTemporaria.get(index).getModelo());
+		anoModeloComboBox.setSelectedItem(listaDeAutomoveisTemporaria.get(index).getAnoModelo());
+		combustivelComboBox.setSelectedItem(listaDeAutomoveisTemporaria.get(index).getCombustivel());
+		quilometragemTextField.setText(listaDeAutomoveisTemporaria.get(index).getQuilometragem().toString());
+		placaTextField.setText(listaDeAutomoveisTemporaria.get(index).getPlaca());
+	}
+	
+
+	/**
+	 * Realiza as verificações necessárias nos campos preenchiveis de um cliente,
+	 * e mostra janelas de erro apropriadas para cada validação que falhe (de apenas uma, a primeira encontrada)
+	 * @param cpf
+	 * @param nomeCliente
+	 * @param email
+	 * @param telefone
+	 * @param endereco
+	 * @return
+	 */
+	private boolean verificarDadosCliente(String cpf, String nomeCliente, String email, String telefone, String endereco) {
+		
+		// Verificações dos campos com dados do Cliente quanto a se então em branco ou não
+		if(cpf.isBlank()) {
+			showMessageDialog(this, "Você deve preencher o CPF do cliente.", "Cadastrar Cliente", ERROR_MESSAGE);
+			return false;
+		}
+		if(nomeCliente.isBlank()) {
+			showMessageDialog(this, "Você deve preencher o Nome do cliente.", "Cadastrar Cliente", ERROR_MESSAGE);
+			return false;
+		}
+		if(email.isBlank()) {
+			showMessageDialog(this, "Você deve preencher o Email do cliente.", "Cadastrar Cliente", ERROR_MESSAGE);
+			return false;
+		}
+		if(telefone.isBlank()) {
+			showMessageDialog(this, "Você deve preencher o Telefone do cliente.", "Cadastrar Cliente", ERROR_MESSAGE);
+			return false;
+		}
+		if(endereco.isBlank()) {
+			showMessageDialog(this, "Você deve preencher o Endereço do cliente.", "Cadastrar Cliente", ERROR_MESSAGE);
+			return false;
+		}
+		
+		// Verificações de formato dos Campos CPF, email e telefone 
+		if(!validarString(cpf,"([0-9]{3}[\\.]?[0-9]{3}[\\.]?[0-9]{3}[-]?[0-9]{2})")) {
+			showMessageDialog(this, "CPF inválido.", "Cadastrar Cliente", ERROR_MESSAGE);
+			return false;
+		}
+		if(!validarString(email,"^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$")) {
+			showMessageDialog(this, "Email inválido.", "Cadastrar Cliente", ERROR_MESSAGE);
+			return false;
+		}
+		if(!validarString(telefone,"\\([0-9]{2}\\)[0-9]{4,5}-[0-9]{4}")) {
+			showMessageDialog(this, "Telefone inválido.", "Cadastrar Cliente", ERROR_MESSAGE);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Realiza as verificações necessárias nos campos preenchiveis de um automóvel,
+	 * e mostra janelas de erro apropriadas para cada validação que falhe (de apenas uma, a primeira encontrada)
+	 * @param modelo
+	 * @param quilometragem
+	 * @param placa
+	 * @return true se passar em todas as verificações, falso caso falhe qualquer uma delas
+	 */
+	private boolean verificarDadosAutomovel(String modelo, String quilometragem, String placa) {
 		
 		// Verificações dos campos preenchiveis com dados do Automóvel quanto a se então em branco ou não
 		if(modelo.isBlank()) {
 			showMessageDialog(this, "Você deve preencher o Modelo do automóvel.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
+			return false;
 		}
-		if(quilometragemString.isBlank()) {
+		if(quilometragem.isBlank()) {
 			showMessageDialog(this, "Você deve preencher a Quilometragem do automóvel.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
+			return false;
 		}
 		if(placa.isBlank()) {
 			showMessageDialog(this, "Você deve preencher a Placa do automóvel.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
+			return false;
 		}
 		
 		// Verificação e parsing do valor String que representa a quilometragem
 		try {
-			quilometragem = Integer.valueOf(quilometragemTextField.getText());
+			Integer.valueOf(quilometragem);
 		} catch (NumberFormatException e) {
 			showMessageDialog(this, "Valor de quilometragem inválido.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
+			return false;
 		}
 		
 		// Verificação do formato da placa (placas antigas e padrão Mercosul)
 		if(!validarString(placa,"([a-zA-z]{3}-?\\d{4})|([a-zA-Z]{3}\\d[a-zA-Z]\\d{2})")) {
 			showMessageDialog(this, "Email inválido.", "Cadastrar Cliente", ERROR_MESSAGE);
-			return;
+			return false;
 		}
 		
-		listaDeAutomoveisTemporaria.add(new Automovel(marca, modelo, anoModelo, combustivel, placa, quilometragem));
+		return true;
 	}
 
 	/**

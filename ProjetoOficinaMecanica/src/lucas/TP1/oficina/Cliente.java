@@ -8,9 +8,6 @@ public class Cliente {
 	private String nome, cfp, email, telefone, endereco;
 	private List<Automovel> automoveisList;
 	
-	// TODO Gera o numero que compõe o código do automovel;
-//	private static int numAutomovel;
-	
 	public Cliente() {
 		automoveisList = new ArrayList<>();
 	}
@@ -64,6 +61,10 @@ public class Cliente {
 		this.endereco = endereco;
 	}
 	
+	public List<Automovel> getAutomoveisList() {
+		return automoveisList;
+	}
+
 	/**
 	 * Adiciona um automóvel na lista de automoveis da Cliente 
 	 * @param automovel 
