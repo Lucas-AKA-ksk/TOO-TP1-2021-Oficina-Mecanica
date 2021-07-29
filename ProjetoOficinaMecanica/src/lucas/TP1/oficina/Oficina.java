@@ -1,8 +1,5 @@
 package lucas.TP1.oficina;
 
-import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
-import static javax.swing.JOptionPane.showMessageDialog;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,12 +7,12 @@ import lucas.TP1.oficina.gui.IgMenuPrincipal;
 
 public class Oficina {
 	private List<Cliente> clientesList;
-	private IgMenuPrincipal igMenuPrincipal;
+	private List<OrdemDeServico> ordensServicoList;
 	
 	public Oficina() {
 		clientesList = new ArrayList<>();
-		
-		igMenuPrincipal = new IgMenuPrincipal(this);
+		ordensServicoList = new ArrayList<>();
+		new IgMenuPrincipal(this);
 	}
 	
 	/**
@@ -26,16 +23,15 @@ public class Oficina {
 	}
 	
 	/**
-	 * Insere o cliente em uma lista de clientes. 
+	 * Insere um cliente em uma lista de clientes. 
 	 */
 	public void cadastrarCliente(Cliente cliente) {
 		clientesList.add(cliente);
-		showMessageDialog(igMenuPrincipal, String.format("Cliente cadastrado com %d carros.", cliente.obterNumeroDeAutomoveis()), "Cadastrar Cliente", INFORMATION_MESSAGE);
 	}
 	
 	/**
-	 * Pesquisa o nome de um cliente na lista de clientes.
-	 * Retorna o cliente se o nome estiver cadastrado ou null caso contrário.
+	 * Pesquisa o CPF de um cliente na lista de clientes.
+	 * Retorna o cliente se o CPF estiver cadastrado ou null caso contrário.
 	 */
 	public Cliente pesquisarCPFCliente(String cpf) {
 		for (Cliente cliente : clientesList) 
@@ -45,13 +41,46 @@ public class Oficina {
 	}
 	
 	/**
-	 * Pesquisa o CPF de um cliente na lista de clientes.
-	 * Retorna o cliente se o CPF estiver cadastrado ou null caso contrário.
+	 * Pesquisa o CPF informado na lista de clientes.
+	 * Retorna true se o CPF estiver cadastrado ou false caso contrário.
+	 */
+	public boolean verificarCPFCliente(String cpf) {
+		for (Cliente cliente : clientesList) 
+			if (cpf.equalsIgnoreCase(cliente.getCfp()))
+					return true;
+		return false;
+	}
+	
+	/**
+	 * Pesquisa o nome de um cliente na lista de clientes.
+	 * Retorna o cliente se o nome estiver cadastrado ou null caso contrário.
 	 */
 	public Cliente pesquisarNomeCliente(String nome) {
 		for (Cliente cliente : clientesList) 
 			if (nome.equalsIgnoreCase(cliente.getNome()))
 					return cliente;
 		return null;
+	}
+	
+	/**
+	 * Insere um ordem de serviço em uma lista de ordens de serviço. 
+	 */
+	public void cadastrarOrdemDeServico(OrdemDeServico ordemDeServico) {
+		ordensServicoList.add(ordemDeServico);
+	}
+	
+	/**
+	 * Pesquisa o numero de uma ordem de serviço na lista de ordens de serviço.
+	 * Retorna a ordem de serviço se o numero estiver cadastrado ou null caso contrário.
+	 */
+	public OrdemDeServico pesquisarNumeroDeOS(String numero) {
+		for(OrdemDeServico ordemDeServico : ordensServicoList)
+			if(numero.equals(ordemDeServico.getNumero()))
+				return ordemDeServico;
+		return null;
+	}
+	
+	public int obterNumeroDeOrdensDeServico() {
+		return ordensServicoList.size();
 	}
 }

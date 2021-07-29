@@ -64,6 +64,16 @@ public class Cliente {
 	public List<Automovel> getAutomoveisList() {
 		return automoveisList;
 	}
+	
+	/**
+	 * Obtem da lista de automóveis do cliente o modelo do carro
+	 * correspondente ao index fornecido
+	 * @param index index do automóvel na lista.
+	 * @return Nome do modelo do automóvel
+	 */
+	public String obterModeloAutomovel(int index) {
+		return automoveisList.get(index).getModelo();
+	}
 
 	/**
 	 * Adiciona um automóvel na lista de automoveis da Cliente 

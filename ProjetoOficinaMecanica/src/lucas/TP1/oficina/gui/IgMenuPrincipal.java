@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
 import lucas.TP1.oficina.Oficina;
 import net.miginfocom.swing.MigLayout;
@@ -26,46 +27,47 @@ public class IgMenuPrincipal extends JDialog {
 		setResizable(false);
 		
 		// Posicionamento e dimensões
-		setSize(250, 138);
+		setSize(250, 190);
 		getContentPane().setLayout(new BorderLayout());
 		
 		// Painel de botões
 		JPanel buttonPane = new JPanel();
+		buttonPane.setBorder(new TitledBorder(null, "Menu Principal", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		getContentPane().add(buttonPane, BorderLayout.CENTER);
-		buttonPane.setLayout(new MigLayout("", "[45px,grow]", "[28px][][]"));
+		buttonPane.setLayout(new MigLayout("", "[45px,grow]", "[28px][][][]"));
 		
 		
 		// Botão de cadastro
 		JButton cadastrarButton = new JButton("Cadastrar");
-		
-		// Registra o tratador de eventos do botão Cadastrar.
 		cadastrarButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				new IgCadastrarCliente(oficina);
 			}
 		});
+		buttonPane.add(cadastrarButton, "cell 0 0,alignx center,aligny center");
+		
+		// Botão Ordem de Serviço
+		JButton ordemServicoButton = new JButton("Ordem de Serviço");
+		ordemServicoButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new IgOrdemDeServico(oficina);
+			}
+		});
+		buttonPane.add(ordemServicoButton, "cell 0 1,alignx center,aligny center");
 		
 		// Botão de relatório
 		JButton relatorioButton = new JButton("Relatório");
-		
-		// Registra o tratador de eventos do botão Relatório.
 		relatorioButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				new IgRelatorioFinanceiro(oficina);
 			}
 		});
+		buttonPane.add(relatorioButton, "cell 0 2,alignx center,aligny center");
 		
 		//Botão de Sair
 		JButton sairButton = new JButton("Sair");
-		
-		// Registra o tratador de eventos do botão Sair.
 		sairButton.addActionListener( (e) -> System.exit(0)  );
-		
-				
-		// Adiciona os botões no buttonPane			
-		buttonPane.add(cadastrarButton, "cell 0 0,alignx center,aligny center");
-		buttonPane.add(relatorioButton, "cell 0 1,alignx center,aligny center");
-		buttonPane.add(sairButton, "cell 0 2,alignx center,aligny center");
+		buttonPane.add(sairButton, "cell 0 3,alignx center,aligny center");
 		
 		// Configura a caixa de dialogo para que ela seja liberada para o sistema quando for fechada
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
