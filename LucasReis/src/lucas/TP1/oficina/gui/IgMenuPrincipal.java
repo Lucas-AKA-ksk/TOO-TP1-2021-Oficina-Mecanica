@@ -7,7 +7,12 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.TitledBorder;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import lucas.TP1.oficina.Oficina;
 import net.miginfocom.swing.MigLayout;
@@ -37,7 +42,7 @@ public class IgMenuPrincipal extends JDialog {
 		setResizable(false);
 		
 		// Posicionamento e dimensões
-		setSize(250, 190);
+		setSize(250, 204);
 		getContentPane().setLayout(new BorderLayout());
 		
 		// Painel de botões
@@ -85,8 +90,26 @@ public class IgMenuPrincipal extends JDialog {
 		// Centraliza a caixa de diálogo
 		setLocationRelativeTo(this);
 		
+		ativarLookAndFeel(new NimbusLookAndFeel());
+		
 		// Exibe a caixa de diálogo.
 		setVisible(true);
 	}
 
+	/**
+	 *  Ativa o look-and-feel em todos os componentes da da caixa de diálogo.
+	 *  Retorna true se o look-and-feel foi ativado ou false caso contrário.
+	 */
+	private boolean ativarLookAndFeel(LookAndFeel  lookAndFeel ) {
+		try { 
+					UIManager.setLookAndFeel(lookAndFeel);
+					SwingUtilities.updateComponentTreeUI(this);
+					
+		} catch (UnsupportedLookAndFeelException e) {
+			System.err.printf("Não foi possível ativar o look-and-fell %s.", lookAndFeel.getName());
+			return false;
+		}
+		return true;
+	}
+	
 }

@@ -96,7 +96,7 @@ public class IgOrdemDeServico extends JDialog {
 	 * Contrutor da classe <code>IgOrdemDeServico</code>.
 	 * Cria uma nova janela de Ordem de Serviço em branco.
 	 * <br>
-	 * (@)wbp.parser.constructor tag -> tag especifica para o windowbuilder
+	 * @wbp.parser.constructor tag -> tag especifica para o windowbuilder
 	 * que define este construtor como o construtor a ser usado na aba de design.
 	 * Para abrir esta classe na aba design,
 	 * basta adicionar esta tag neste comentário javadoc.
@@ -134,6 +134,7 @@ public class IgOrdemDeServico extends JDialog {
 		
 		// TextField do número de serviço
 		numeroTextField = new JTextField();
+		numeroTextField.setToolTipText("Número da Ordem de Serviço. Pressione Enter para pesquisar uma Ordem de Serviço.");
 		numeroTextField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				pesquisarOrdemDeServico();
@@ -158,6 +159,7 @@ public class IgOrdemDeServico extends JDialog {
 		
 		// TextField da Data
 		dataTextField = new JTextField();
+		dataTextField.setToolTipText("Dia da geração da ordem de serviço.");
 		dataTextField.setEditable(false);
 		ordemServicoPanel.add(dataTextField, "cell 1 1 3 1,alignx left");
 		dataTextField.setColumns(10);
@@ -169,6 +171,7 @@ public class IgOrdemDeServico extends JDialog {
 			
 		// TextField da Hora
 		horaTextField = new JTextField();
+		horaTextField.setToolTipText("Horário da geração da Ordem de serviço.");
 		horaTextField.setEditable(false);
 		ordemServicoPanel.add(horaTextField, "cell 1 2 2 1,alignx left");
 		horaTextField.setColumns(10);
@@ -186,6 +189,7 @@ public class IgOrdemDeServico extends JDialog {
 				
 		// TextField de CPF
 		cpfTextField = new JTextField();
+		cpfTextField.setToolTipText("CPF do cliente atendido.");
 		cpfTextField.setEditable(false);
 		clientePanel.add(cpfTextField, "cell 1 0 3 1,alignx left");
 		cpfTextField.setColumns(10);
@@ -197,6 +201,7 @@ public class IgOrdemDeServico extends JDialog {
 		
 		// TextField do Nome
 		nomeTextField = new JTextField();
+		nomeTextField.setToolTipText("Nome do Cliente atendido.");
 		nomeTextField.setEditable(false);
 		clientePanel.add(nomeTextField, "cell 1 1 3 1,growx");
 		nomeTextField.setColumns(10);
@@ -208,6 +213,7 @@ public class IgOrdemDeServico extends JDialog {
 		
 		// ComboBox do Código do Automóvel
 		codigoCarrocomboBox = new JComboBox<>();
+		codigoCarrocomboBox.setToolTipText("Código do carro do cliente.");
 		codigoCarrocomboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange() == ItemEvent.SELECTED)
@@ -223,6 +229,7 @@ public class IgOrdemDeServico extends JDialog {
 		
 		// TextField do Modelo
 		modeloTextField = new JTextField();
+		modeloTextField.setToolTipText("Modelo do carro do Cliente.");
 		modeloTextField.setEditable(false);
 		clientePanel.add(modeloTextField, "cell 3 2,alignx right");
 		modeloTextField.setColumns(10);
@@ -280,6 +287,7 @@ public class IgOrdemDeServico extends JDialog {
 		servicosTable.getColumnModel().getColumn(1).setPreferredWidth(350);
 		servicosTable.getColumnModel().getColumn(2).setResizable(false);
 		servicosTable.getColumnModel().getColumn(2).setPreferredWidth(100);
+		servicosTable.setShowGrid(true);
 		servicosScrollPane.setViewportView(servicosTable);
 				
 		// Listener da tabela de serviços que reage a altereções na coluna de preço
@@ -347,6 +355,7 @@ public class IgOrdemDeServico extends JDialog {
 		pecasTable.getColumnModel().getColumn(2).setResizable(false);
 		pecasTable.getColumnModel().getColumn(3).setResizable(false);
 		pecasTable.getColumnModel().getColumn(4).setResizable(false);
+		pecasTable.setShowGrid(true);
 		pecasScrollPane.setViewportView(pecasTable);
 				
 		

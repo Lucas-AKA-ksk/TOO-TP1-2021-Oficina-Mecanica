@@ -56,7 +56,7 @@ public class IgRelatorioFinanceiro extends JDialog {
 	public IgRelatorioFinanceiro(Oficina oficina) {
 		this.oficina = oficina;
 		// Titulo
-		setTitle("Ordem de serviço");
+		setTitle("Relatório Financeiro");
 		
 		// Desabilita o redimensionamento
 		setResizable(false);
@@ -83,6 +83,7 @@ public class IgRelatorioFinanceiro extends JDialog {
 				
 		// TextField de Data Inicial
 		dataInicialTextField = new JTextField();
+		dataInicialTextField.setToolTipText("Data Inicial do relatório. Se não houver Data Final o relatório será apenas da data digitada.");
 		dataInicialTextField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				gerarRelatorio();
@@ -99,6 +100,7 @@ public class IgRelatorioFinanceiro extends JDialog {
 			
 		// TextField de Data Final
 		dataFinalTextField = new JTextField();
+		dataFinalTextField.setToolTipText("Data Final do relatório.");
 		dataFinalTextField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				gerarRelatorio();
@@ -168,6 +170,7 @@ public class IgRelatorioFinanceiro extends JDialog {
 		servicosTable.getColumnModel().getColumn(0).setPreferredWidth(350);
 		servicosTable.getColumnModel().getColumn(1).setResizable(false);
 		servicosTable.getColumnModel().getColumn(1).setPreferredWidth(179);
+		servicosTable.setShowGrid(true);
 		servicosScrollPane.setViewportView(servicosTable);
 				
 			
@@ -222,6 +225,7 @@ public class IgRelatorioFinanceiro extends JDialog {
 		pecasTable.getColumnModel().getColumn(1).setResizable(false);
 		pecasTable.getColumnModel().getColumn(2).setResizable(false);
 		pecasTable.getColumnModel().getColumn(3).setResizable(false);
+		pecasTable.setShowGrid(true);
 		pecasScrollPane.setViewportView(pecasTable);
 				
 			
@@ -342,6 +346,8 @@ public class IgRelatorioFinanceiro extends JDialog {
 				gerarRelatorio(dataInicial);
 			}
 		}
+		else
+			showMessageDialog(this, "Campo Data Inicial está vazio.", "Relatório Financeiro", ERROR_MESSAGE);
 	}
 
 	/**
@@ -418,4 +424,5 @@ public class IgRelatorioFinanceiro extends JDialog {
 				
 		}
 	}
+	
 }

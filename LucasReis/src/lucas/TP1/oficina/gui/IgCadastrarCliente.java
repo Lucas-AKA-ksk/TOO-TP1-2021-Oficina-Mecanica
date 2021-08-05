@@ -94,6 +94,7 @@ public class IgCadastrarCliente extends JDialog {
 		
 		// TextField para CPF
 		cpfTextField = new JTextField();
+		cpfTextField.setToolTipText("CPF do cliente. \r\nPressione Enter para pesquisar o CPF digitado.");
 		pesquisaClientePanel.add(cpfTextField, "cell 1 0,alignx left");
 		cpfTextField.setColumns(10);
 		cpfTextField.addActionListener((e) -> pesquisarCliente() );
@@ -106,6 +107,7 @@ public class IgCadastrarCliente extends JDialog {
 					
 		// TextField para o Nome
 		nomeTextField = new JTextField();
+		nomeTextField.setToolTipText("Nome do cliente. Pressione enter para pesquisar o nome digitado.");
 		pesquisaClientePanel.add(nomeTextField, "cell 1 1,growx");
 		nomeTextField.setColumns(10);
 		nomeTextField.addActionListener((e) -> pesquisarCliente() );
@@ -128,6 +130,7 @@ public class IgCadastrarCliente extends JDialog {
 				
 		// TextField do email
 		emailTextField = new JTextField();
+		emailTextField.setToolTipText("Email do cliente.");
 		clientePanel.add(emailTextField, "cell 1 1,grow");
 		emailTextField.setColumns(10);
 			
@@ -139,6 +142,7 @@ public class IgCadastrarCliente extends JDialog {
 		
 		// TextField do telefone
 		telefoneTextField = new JTextField();
+		telefoneTextField.setToolTipText("Telefone do Cliente no formato (xx)xxxxx-xxxx");
 		clientePanel.add(telefoneTextField, "cell 1 2,alignx left");
 		telefoneTextField.setColumns(10);
 			
@@ -150,6 +154,7 @@ public class IgCadastrarCliente extends JDialog {
 			
 		// TextArea do endereço
 		enderecoTextArea = new JTextArea();
+		enderecoTextArea.setToolTipText("Endereço do Cliente");
 		enderecoTextArea.setLineWrap(true);
 		clientePanel.add(enderecoTextArea, "cell 0 4 2 1,grow");
 		
@@ -167,6 +172,7 @@ public class IgCadastrarCliente extends JDialog {
 		
 		// ComboBox do código do automóvel
 		codigoComboBox = new JComboBox<>();
+		codigoComboBox.setToolTipText("Código do Automóvel do cliente.");
 		codigoComboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange() == ItemEvent.SELECTED)
@@ -183,6 +189,7 @@ public class IgCadastrarCliente extends JDialog {
 		
 		// ComboBox da MArca do automóvel
 		marcaComboBox = new JComboBox<>();
+		marcaComboBox.setToolTipText("Marca do Automóvel do cliente.");
 		marcaComboBox.setModel(new DefaultComboBoxModel<String>(new String[] {
 				"Acura", "Alfa Romeo", "Aston Martin", "Audi", "BAC",
 				"BMW", "Bentley", "Bizzarrini", "Bowler", "Bugatti",
@@ -209,6 +216,7 @@ public class IgCadastrarCliente extends JDialog {
 				
 		// TextField do Modelo
 		modeloTextField = new JTextField();
+		modeloTextField.setToolTipText("Modelo do Automóvel.");
 		modeloLabel.setLabelFor(modeloTextField);
 		automovelPanel.add(modeloTextField, "cell 1 2,growx");
 		modeloTextField.setColumns(10);
@@ -221,6 +229,7 @@ public class IgCadastrarCliente extends JDialog {
 		
 		// Combobox do ano
 		anoModeloComboBox = new JComboBox<>();
+		anoModeloComboBox.setToolTipText("Ano do Modelo.");
 		anoModeloComboBox.setModel(new DefaultComboBoxModel<String>(new String[] {
 				"2021", "2020", "2019", "2018",
 				"2017", "2016", "2015", "2014",
@@ -263,6 +272,7 @@ public class IgCadastrarCliente extends JDialog {
 		
 		// ComboBox do combustível
 		combustivelComboBox = new JComboBox<>();
+		combustivelComboBox.setToolTipText("Tipo(s) de Combustível do Automóvel.");
 		combustivelComboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"Diesel", "Elétrico", "Ethanol", "Ethanol e/ou Gasolina", "Gasolina", "GNV"}));
 		combustivelComboBox.setSelectedIndex(3);
 		automovelPanel.add(combustivelComboBox, "cell 1 4,alignx left");
@@ -274,6 +284,7 @@ public class IgCadastrarCliente extends JDialog {
 		
 		// TextField da Quilometragem
 		quilometragemTextField = new JTextField();
+		quilometragemTextField.setToolTipText("Quilometragem do Automóvel.");
 		quilometragemLabel.setLabelFor(quilometragemTextField);
 		quilometragemTextField.setColumns(10);
 		automovelPanel.add(quilometragemTextField, "flowx,cell 1 5,alignx left");
@@ -285,6 +296,7 @@ public class IgCadastrarCliente extends JDialog {
 		
 		// TextField da Placa do veículo
 		placaTextField = new JTextField();
+		placaTextField.setToolTipText("Número da placa do veículo.");
 		placaLabel.setLabelFor(placaTextField);
 		placaTextField.setColumns(10);
 		automovelPanel.add(placaTextField, "cell 1 6,alignx left");
@@ -337,8 +349,8 @@ public class IgCadastrarCliente extends JDialog {
 					
 				}
 				else
-					showMessageDialog(null, "Não é possível realizar ordens de serviço com dados\n não verificados,"
-							+ " pesquise os dados do cliente antes", "Cadastrar Cliente", ERROR_MESSAGE);
+					showMessageDialog(null, "Campos Vazios encontrados, termine de preencher o cadastro\n"
+							+ "ou pesquise os dados de um cliente já cadastrado.", "Cadastrar Cliente", ERROR_MESSAGE);
 			}
 		});
 		ordemServicoButton.setMnemonic(KeyEvent.VK_O);
@@ -476,16 +488,6 @@ public class IgCadastrarCliente extends JDialog {
 	private void preencherCamposDaTela(Cliente cliente) {
 		
 		preencherCamposDoCliente(cliente);
-		
-//		// Esvazia o ComboBox de códigos
-//		codigoComboBox.removeAllItems();
-//		
-//		// Preenche a lista temporária com cópias dos objetos Automovel
-//		listaDeAutomoveisTemporaria = cliente.copiarListaDeAutomoveis();
-//		
-//		// Preenche o ComboBox de códigos com os códigos dos carros do cliente
-//		for(Automovel automovel : listaDeAutomoveisTemporaria)
-//			codigoComboBox.addItem(automovel.getCodigo());
 		
 		// Preenche os campos do automovel da GUI com os dados do primeiro automóvel do cliente
 		preencherCamposDoAutomovel(cliente, 0);
