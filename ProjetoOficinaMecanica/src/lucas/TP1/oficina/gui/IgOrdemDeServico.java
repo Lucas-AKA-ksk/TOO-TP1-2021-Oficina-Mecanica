@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -38,6 +39,13 @@ import net.miginfocom.swing.MigLayout;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 
+/**
+ * Classe que representa o menu de cadastro de ordens de serviço,
+ * onde operações de cadastro, consulta e atualização das mesmas pode ser realizado 
+ * através de uma Interface Gráfica.
+ *
+ * @author Lucas Reis
+ */
 @SuppressWarnings("serial")
 public class IgOrdemDeServico extends JDialog {
 
@@ -56,12 +64,15 @@ public class IgOrdemDeServico extends JDialog {
 	private Oficina oficina;
 
 	/**
+	 * Contrutor da classe <code>IgOrdemDeServico</code>.
 	 * Cria uma nova janela de Ordem de Serviço com os dados do cliente já preenchidos,
 	 * assim como o numero da ordem de serviço, data e hora do preenchimento da ordem de serviço
-	 * @param oficina
-	 * @param cpf
-	 * @param nome
-	 * @param automoveis
+	 * 
+	 * @param oficina objeto do tipo <code>Oficina</code>
+	 * para que esta classe invoque os métodos da mesma;
+	 * @param cpf CPF do cliente usado para preencher o campo da interface;
+	 * @param nome nome do cliente usado para preencher o campo da interface;
+	 * @param automoveis lista de automóveis do cliente usada para preencher os campo da interface.
 	 */
 	public IgOrdemDeServico(Oficina oficina, String cpf, String nome, List<Automovel> automoveis) {
 		this(oficina);
@@ -82,9 +93,16 @@ public class IgOrdemDeServico extends JDialog {
 	}
 	
 	/**
-	 * Cria uma nova janela de Ordem de Serviço em branco
-	 * @wbp.parser.constructor
-	 * @param oficina
+	 * Contrutor da classe <code>IgOrdemDeServico</code>.
+	 * Cria uma nova janela de Ordem de Serviço em branco.
+	 * <br>
+	 * (@)wbp.parser.constructor tag -> tag especifica para o windowbuilder
+	 * que define este construtor como o construtor a ser usado na aba de design.
+	 * Para abrir esta classe na aba design,
+	 * basta adicionar esta tag neste comentário javadoc.
+	 * 
+	 * @param oficina objeto do tipo <code>Oficina</code>
+	 * para que esta classe invoque os métodos da mesma.
 	 */
 	public IgOrdemDeServico(Oficina oficina) {
 		
@@ -116,6 +134,11 @@ public class IgOrdemDeServico extends JDialog {
 		
 		// TextField do número de serviço
 		numeroTextField = new JTextField();
+		numeroTextField.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				pesquisarOrdemDeServico();
+			}
+		});
 		ordemServicoPanel.add(numeroTextField, "cell 1 0 4 1,growx");
 		numeroTextField.setColumns(10);
 			
@@ -188,7 +211,7 @@ public class IgOrdemDeServico extends JDialog {
 		codigoCarrocomboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange() == ItemEvent.SELECTED)
-					modeloTextField.setText(oficina.pesquisarCPFCliente(cpfTextField.getText()).obterModeloAutomovel(codigoCarrocomboBox.getSelectedIndex()));
+					modeloTextField.setText(oficina.pesquisarClientePeloCPF(cpfTextField.getText()).obterModeloAutomovel(codigoCarrocomboBox.getSelectedIndex()));
 			}
 		});
 		clientePanel.add(codigoCarrocomboBox, "flowx,cell 1 2,alignx left");
@@ -364,11 +387,14 @@ public class IgOrdemDeServico extends JDialog {
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			
-		// Botão Gravar TODO atualização de ordem de serviço
+		// Botão Gravar
 		JButton gravarButton = new JButton("Gravar");
 		gravarButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				gravarOrdemDeServico();
+				if(oficina.verificarNumeroDeOS(numeroTextField.getText().trim()))
+					alterarOrdemDeServico();
+				else
+					gravarOrdemDeServico();
 			}
 		});
 		gravarButton.setMnemonic(KeyEvent.VK_G);
@@ -406,17 +432,16 @@ public class IgOrdemDeServico extends JDialog {
 				hora = horaTextField.getText().isBlank() ? horaTextField.getText() : LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")),
 				cpf = cpfTextField.getText(),
 				nome = nomeTextField.getText(),
+				codigo = (String) codigoCarrocomboBox.getSelectedItem(),
 				modelo = modeloTextField.getText();
-		Double valorTotal = Double.valueOf(ValorTotalTextField.getText());
+		
 		OrdemDeServico novaOrdemDeServico;
 		
 		if(verificarCampos(numero, cpf, nome, modelo)) {
-			novaOrdemDeServico = new OrdemDeServico(numero, data, hora, cpf, nome, modelo, valorTotal);
+			novaOrdemDeServico = new OrdemDeServico(numero, data, hora, cpf, nome, codigo, modelo);
 			
 			DefaultTableModel servicosTM = (DefaultTableModel) servicosTable.getModel();
 			DefaultTableModel pecasTM = (DefaultTableModel) pecasTable.getModel();
-			
-			
 				
 			// Adicionando Serviços da tabela na Ordem de serviço
 			for (int linha = 0; linha < servicosTM.getRowCount(); linha++) {
@@ -446,12 +471,99 @@ public class IgOrdemDeServico extends JDialog {
 					pecasTM.setValueAt(null, linha, 4);
 			}
 			
+			// Caso pelo menos uma das tabelas não esteja vazia, cadastra a nova ordem de serviço
 			if(novaOrdemDeServico.obterNumeroDeServicos() > 0 || novaOrdemDeServico.obterNumeroDePecas() > 0) {
+				novaOrdemDeServico.setValorTotal(Double.valueOf(ValorTotalTextField.getText()));
 				oficina.cadastrarOrdemDeServico(novaOrdemDeServico);
-				showMessageDialog(this, "Ordem de serviço cadastrada coom sucesso.", "Ordem de Serviço", INFORMATION_MESSAGE);
+				showMessageDialog(this, "Ordem de serviço cadastrada com sucesso.", "Ordem de Serviço", INFORMATION_MESSAGE);
+				
+				// Coloca o próximo número disponível na área de texto numeroTextField
+				numeroTextField.setText(String.format("%04d", oficina.obterNumeroDeOrdensDeServico()+1));
 			}
 			else
 				showMessageDialog(this, "Não é possível cadastrar uma ordem de serviço\n sem serviços ou peças", "Ordem de Serviço", ERROR_MESSAGE);
+		}
+	}
+	
+	/**
+	 * Realiza a alteração de uma ordem de serviço
+	 */
+	private void alterarOrdemDeServico() {
+		
+		String numero = numeroTextField.getText().trim(),
+				data = dataTextField.getText().isBlank() ? dataTextField.getText() : LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+				hora = horaTextField.getText().isBlank() ? horaTextField.getText() : LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")),
+				cpf = cpfTextField.getText(),
+				nome = nomeTextField.getText(),
+				codigo = (String) codigoCarrocomboBox.getSelectedItem(),
+				modelo = modeloTextField.getText();
+		
+		OrdemDeServico ordemDeServicoAtualizada;
+		
+		if(verificarCampos(numero, cpf, nome, modelo)) {
+			ordemDeServicoAtualizada = oficina.pesquisarNumeroDeOS(numero);
+			
+			
+			DefaultTableModel servicosTM = (DefaultTableModel) servicosTable.getModel();
+			DefaultTableModel pecasTM = (DefaultTableModel) pecasTable.getModel();
+			
+			List<Servico> tabelaDeServicosAtualizada = new ArrayList<>();
+			List<Peca> tabelaDePecasAtualizada = new ArrayList<>();
+			
+			// Adicionando Serviços Atualizados da tabela em uma lista temporária
+			for (int linha = 0; linha < servicosTM.getRowCount(); linha++) {
+				
+				// Verifica se todas as colunas da linha estão preenchidas
+				if(servicosTM.getValueAt(linha, 0) != null && servicosTM.getValueAt(linha, 1) != null && servicosTM.getValueAt(linha, 2) != null) {
+					tabelaDeServicosAtualizada.add(new Servico(servicosTM.getValueAt(linha, 1).toString().trim(), Double.valueOf(servicosTM.getValueAt(linha, 2).toString().trim())));
+				}
+				/* Caso Alguma coluna esteja em branco nesta linha, muda o valor da coluna preço final para null,
+				 * a fim de disparar o event listener que recalcula o Valor Total da Ordem de Serviço*/
+				else
+					servicosTM.setValueAt(null, linha, 2);
+			}
+			
+			// Adicionando Peças Atualizados da tabela em uma lista temporária
+			for (int linha = 0; linha < pecasTM.getRowCount(); linha++) {
+				
+				// Verifica se todas as colunas da linha estão preenchidas
+				if(pecasTM.getValueAt(linha, 0) != null && pecasTM.getValueAt(linha, 1) != null && pecasTM.getValueAt(linha, 2) != null 
+						&& pecasTM.getValueAt(linha, 3) != null && pecasTM.getValueAt(linha, 4) != null) {
+					
+					tabelaDePecasAtualizada.add(new Peca(pecasTM.getValueAt(linha, 1).toString().trim(), Integer.valueOf(pecasTM.getValueAt(linha, 2).toString()), Double.valueOf(pecasTM.getValueAt(linha, 3).toString()), Double.valueOf(pecasTM.getValueAt(linha, 4).toString())));
+				}
+				/* Caso Alguma coluna esteja em branco nesta linha, muda o valor da coluna preço final para null,
+				 * a fim de disparar o event listener que recalcula o Valor Total da Ordem de Serviço*/
+				else
+					pecasTM.setValueAt(null, linha, 4);
+			}
+			
+			// Caso pelo menos uma das tabelas atualizadas não estajam vazias
+			if(tabelaDeServicosAtualizada.size() > 0 || tabelaDePecasAtualizada.size() > 0) {
+				
+				// Esvazia as listas de Serviços e Peças 
+				ordemDeServicoAtualizada.esvaziarListaDeServicos();
+				ordemDeServicoAtualizada.esvaziarListaDePecas();
+				
+				// Insere os Serviços e Peças atualizados nas listas
+				for(Servico servico : tabelaDeServicosAtualizada)
+					ordemDeServicoAtualizada.adicionarServico(servico);
+				for(Peca peca : tabelaDePecasAtualizada)
+					ordemDeServicoAtualizada.adicionarPeca(peca);
+				
+				
+				ordemDeServicoAtualizada.setData(data);
+				ordemDeServicoAtualizada.setHora(hora);
+				ordemDeServicoAtualizada.setCpf(cpf);
+				ordemDeServicoAtualizada.setNome(nome);
+				ordemDeServicoAtualizada.setCodigo(codigo);
+				ordemDeServicoAtualizada.setModelo(modelo);
+				ordemDeServicoAtualizada.setValorTotal(Double.valueOf(ValorTotalTextField.getText()));
+				
+				showMessageDialog(this, "Ordem de serviço atualizada com sucesso.", "Ordem de Serviço", INFORMATION_MESSAGE);
+			}
+			else
+				showMessageDialog(this, "Não é possível atualizar uma ordem de serviço\n sem serviços ou peças", "Ordem de Serviço", ERROR_MESSAGE);
 		}
 	}
 	
@@ -480,7 +592,8 @@ public class IgOrdemDeServico extends JDialog {
 	
 	/**
 	 * Preenche os campos da tela com as informações de uma Ordem de Serviço.
-	 * @param ordemServico
+	 * 
+	 * @param ordemServico Objeto <code>OrdemDeServico</code> usado para preencher os campos da Interface Gráfica.
 	 */
 	private void preencherCamposDaTela(OrdemDeServico ordemServico) {
 		
@@ -493,10 +606,11 @@ public class IgOrdemDeServico extends JDialog {
 		nomeTextField.setText(ordemServico.getNome());
 		modeloTextField.setText(ordemServico.getModelo());
 		
-		Cliente cliente = oficina.pesquisarCPFCliente(ordemServico.getCpf());
+		Cliente cliente = oficina.pesquisarClientePeloCPF(ordemServico.getCpf());
 		for(int i = 1; i <= cliente.obterNumeroDeAutomoveis(); i++)
 			codigoCarrocomboBox.addItem(String.format("A%d", i));
 		
+		codigoCarrocomboBox.setSelectedItem(ordemServico.getCodigo());
 		
 		DefaultTableModel servicosTM = (DefaultTableModel) servicosTable.getModel();
 		for(int linha = 0; linha < ordemServico.obterNumeroDeServicos(); linha++) {
@@ -516,7 +630,6 @@ public class IgOrdemDeServico extends JDialog {
 	/**
 	 * Limpa todos os campos da tela assim como os campos editaveis das tabelas
 	 */
-
 	private void limparCamposDaTela() {
 		
 		numeroTextField.setText(null);
@@ -537,10 +650,12 @@ public class IgOrdemDeServico extends JDialog {
 	}
 	
 	/**
-	 * Limpa os dados de uma tabela
+	 * Limpa os dados de uma tabela, a partir de uma coluna de index <code>inicio</code> até 
+	 * a coluna anterior ao index <code>fim</code>.
+	 * 
 	 * @param tableModel TableModel da tabela
-	 * @param fim 
-	 * @param inicio 
+	 * @param inicio index inicial; 
+	 * @param fim index final.
 	 */
 	private void limparTabela(DefaultTableModel tableModel, int inicio, int fim) {
 		
@@ -549,14 +664,15 @@ public class IgOrdemDeServico extends JDialog {
 				tableModel.setValueAt(null, linha, coluna);
 	}
 	
-
 	/**
-	 * Realiza as verificações necessárias nos campos editaveis da janela
-	 * @param numero
-	 * @param cpf
-	 * @param nome
-	 * @param modelo
-	 * @return
+	 * Realiza as verificações necessárias nos campos editaveis da janela, apenas verifica se não estão vazios.
+	 * 
+	 * @param numero número da ordem de serviço fornecido para verificação;
+	 * @param cpf CPF do cliente fornecido para validação;
+	 * @param nome nome do cliente fornecido para validação;
+	 * @param modelo modelo do automóvel fornecido para validação.
+	 * 
+	 * @return <code>true</code> se todos os campos forem validados e <code>false</code> se alguma validação falhar.
 	 */
 	public boolean verificarCampos(String numero, String cpf, String nome, String modelo) {
 		
@@ -576,7 +692,6 @@ public class IgOrdemDeServico extends JDialog {
 			showMessageDialog(this, "Você deve preencher o modelo do carro do cliente.", "Ordem de Serviço", ERROR_MESSAGE);
 			return false;
 		}
-		
 		return true;
 	}
 

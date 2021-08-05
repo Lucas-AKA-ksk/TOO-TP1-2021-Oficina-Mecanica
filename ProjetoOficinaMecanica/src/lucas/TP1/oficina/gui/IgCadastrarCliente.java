@@ -30,8 +30,16 @@ import lucas.TP1.oficina.Cliente;
 import lucas.TP1.oficina.Oficina;
 import net.miginfocom.swing.MigLayout;
 
+/**
+ * Classe que representa o menu de cadastro de Clientes,
+ * onde operações de cadastro e pesquisa de clientes pode ser realizado
+ * através de uma Interface Gráfica.
+ * 
+ * @author Lucas Reis
+ */
 @SuppressWarnings("serial")
 public class IgCadastrarCliente extends JDialog {
+	
 	private JTextField emailTextField;
 	private JTextField telefoneTextField;
 	private JTextField cpfTextField;
@@ -48,8 +56,10 @@ public class IgCadastrarCliente extends JDialog {
 	private Oficina oficina;
 
 	/**
-	 * Create the dialog.
-	 * @param menuPrincipal 
+	 * Construtor da classe <code>IgCadastrarCliente</code>
+	 * 
+	 * @param oficina objeto do tipo <code>Oficina</code>
+	 * para que esta classe invoque os métodos da mesma.
 	 */
 	public IgCadastrarCliente(Oficina oficina) {
 		this.oficina = oficina;
@@ -322,7 +332,7 @@ public class IgCadastrarCliente extends JDialog {
 						cadastrarCliente();
 						
 					new IgOrdemDeServico(oficina, cpfTextField.getText(), nomeTextField.getText(),
-							oficina.pesquisarCPFCliente(cpfTextField.getText().replaceAll("\\D", "")).getAutomoveisList());
+							oficina.pesquisarClientePeloCPF(cpfTextField.getText().replaceAll("\\D", "")).copiarListaDeAutomoveis());
 					dispose();
 					
 				}
@@ -386,9 +396,8 @@ public class IgCadastrarCliente extends JDialog {
 					oficina.cadastrarCliente(novoCliente);
 					showMessageDialog(this, String.format("Cliente cadastrado com %d carros.", novoCliente.obterNumeroDeAutomoveis()), "Cadastrar Cliente", INFORMATION_MESSAGE);
 
-					// Esvaziar lista temporária e o campo código
-					listaDeAutomoveisTemporaria.clear();
-					codigoComboBox.removeAllItems();
+					// Preenche os campos de dados do automóvel com os automóveis do novo cliente (cópias)
+					preencherCamposDoAutomovel(novoCliente, 0);
 				}
 				/* Caso a lista temporária de automóveis esteja vazia, checa os campos
 				 * de dados de automóvel, e caso tenham dados preenchidos, cria um novo
@@ -445,9 +454,9 @@ public class IgCadastrarCliente extends JDialog {
 		Cliente clientePesquisado;
 		
 		if(!cpf.isBlank())
-			clientePesquisado = oficina.pesquisarCPFCliente(cpf);
+			clientePesquisado = oficina.pesquisarClientePeloCPF(cpf);
 		else if(!nomeCliente.isBlank())
-			clientePesquisado = oficina.pesquisarNomeCliente(nomeCliente);
+			clientePesquisado = oficina.pesquisarClientePeloNome(nomeCliente);
 		else {
 			showMessageDialog(this, "Campos de CPF e nome vazios.", "Cadastrar Cliente", ERROR_MESSAGE);
 			return;
@@ -462,31 +471,32 @@ public class IgCadastrarCliente extends JDialog {
 	
 	/**
 	 * Preenche os campos dos dados do cliente, 
-	 * @param cliente
+	 * @param cliente Objeto <code>Cliente</code> usado para preencher a GUI.
 	 */
 	private void preencherCamposDaTela(Cliente cliente) {
 		
 		preencherCamposDoCliente(cliente);
 		
-		// Esvazia o ComboBox de códigos
-		codigoComboBox.removeAllItems();
+//		// Esvazia o ComboBox de códigos
+//		codigoComboBox.removeAllItems();
+//		
+//		// Preenche a lista temporária com cópias dos objetos Automovel
+//		listaDeAutomoveisTemporaria = cliente.copiarListaDeAutomoveis();
+//		
+//		// Preenche o ComboBox de códigos com os códigos dos carros do cliente
+//		for(Automovel automovel : listaDeAutomoveisTemporaria)
+//			codigoComboBox.addItem(automovel.getCodigo());
 		
-		// Preenche a lista temporária com cópias dos objetos Automovel
-		for(Automovel automovel : cliente.getAutomoveisList())
-			listaDeAutomoveisTemporaria.add(automovel.copy());
-		
-		// Preenche o ComboBox de códigos com os códigos dos carros do cliente
-		for(Automovel automovel : listaDeAutomoveisTemporaria)
-			codigoComboBox.addItem(automovel.getCodigo());
-		
-		preencherCamposDoAutomovel(0);
+		// Preenche os campos do automovel da GUI com os dados do primeiro automóvel do cliente
+		preencherCamposDoAutomovel(cliente, 0);
 		
 	}
 	
 	/**
 	 * Configura os campos dos dados do cliente com os dados adquiridos
 	 * do parâmetro cliente.
-	 * @param cliente
+	 * 
+	 * @param cliente Objeto <code>Cliente</code> usado para preencher a GUI.
 	 */
 	private void preencherCamposDoCliente(Cliente cliente){
 		
@@ -498,11 +508,36 @@ public class IgCadastrarCliente extends JDialog {
 	}
 	
 	/**
+	 * Altera a <code>listaDeAutomoveisTemporaria</code> fazendo que a mesma referencie uma cópia
+	 * da lista de automóveis de um cliente.
 	 * Configura os campos dos dados do automóvel com as informações do automóvel
-	 * no index especificado da listaDeAutomoveisTemporaria.
-	 * @param index index de listaDeAutomoveisTemporaria com as informações parapreencher os campos
+	 * no index especificado da <code>listaDeAutomoveisTemporaria</code>.
+	 * 
+	 * @param cliente cliente do qual será obtida a cópia da lista de automóveis;
+	 * @param index index de <code>listaDeAutomoveisTemporaria</code> com as informações para preencher os campos.
 	 */
-	private void preencherCamposDoAutomovel(int index){
+	private void preencherCamposDoAutomovel(Cliente cliente, int index) {
+		
+		// Esvazia o ComboBox de códigos
+		codigoComboBox.removeAllItems();
+		
+		// Preenche a lista temporária com cópias dos objetos Automovel
+		listaDeAutomoveisTemporaria = cliente.copiarListaDeAutomoveis();
+		
+		// Preenche o ComboBox de códigos com os códigos dos carros do cliente
+		for(Automovel automovel : listaDeAutomoveisTemporaria)
+			codigoComboBox.addItem(automovel.getCodigo());
+		
+		preencherCamposDoAutomovel(index);
+	}
+	
+	/**
+	 * Configura os campos dos dados do automóvel com as informações do automóvel
+	 * no index especificado da <code>listaDeAutomoveisTemporaria</code>.
+	 * 
+	 * @param index index de <code>listaDeAutomoveisTemporaria</code> com as informações para preencher os campos.
+	 */
+	private void preencherCamposDoAutomovel(int index) {
 		
 		marcaComboBox.setSelectedItem(listaDeAutomoveisTemporaria.get(index).getMarca());
 		modeloTextField.setText(listaDeAutomoveisTemporaria.get(index).getModelo());
@@ -510,17 +545,28 @@ public class IgCadastrarCliente extends JDialog {
 		combustivelComboBox.setSelectedItem(listaDeAutomoveisTemporaria.get(index).getCombustivel());
 		quilometragemTextField.setText(listaDeAutomoveisTemporaria.get(index).getQuilometragem().toString());
 		placaTextField.setText(listaDeAutomoveisTemporaria.get(index).getPlaca());
-	}	
+	}
+		
 
 	/**
 	 * Realiza as verificações necessárias nos campos preenchiveis de um cliente,
-	 * e mostra janelas de erro apropriadas para cada validação que falhe
-	 * @param cpf
-	 * @param nome
-	 * @param email
-	 * @param telefone
-	 * @param endereco
-	 * @return true se todas as validações forem bem-sucedidas, false caso falhe alguma delas
+	 * e mostra janelas de erro apropriadas para cada validação que falhe.
+	 * 
+	 * As validações são: <br>
+	 * - Campos não podem estar vazios; <br>
+	 * - <code>cpf</code> deve conformar a expressão regular "([0-9]{3}[\\.]?[0-9]{3}[\\.]?[0-9]{3}[-]?[0-9]{2})"
+	 * que é validada para CPF digitado nos formatos 123.456.789-10 e 12345678910, ou seja, com ou sem os caracteres separadores; <br>
+	 * - <code>email</code> deve conformar com a expressão regular "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$"
+	 * que é validada para adequar a RFC 5322. <br>
+	 * - <code>telefone</code> deve conformar com a expressão regular "\\([0-9]{2}\\)[0-9]{4,5}-[0-9]{4}" que é validada para telefones no formato (xx)Xxxxx-xxxx (X sendo opcional).
+	 * 
+	 * @param cpf cpf fornecido para verificação;
+	 * @param nome nome fornecido para verificação;
+	 * @param email email fornecido para verificação;
+	 * @param telefone telefone fornecido para verificação;
+	 * @param endereco endereço fornecido para verificação.
+	 * 
+	 * @return <code>true</code> se todas as validações forem bem-sucedidas, <code>false</code> caso falhe alguma delas.
 	 */
 	private boolean verificarDadosCliente(String cpf, String nome, String email, String telefone, String endereco) {
 		
@@ -565,11 +611,21 @@ public class IgCadastrarCliente extends JDialog {
 	
 	/**
 	 * Realiza as verificações necessárias nos campos preenchiveis de um automóvel,
-	 * e mostra janelas de erro apropriadas para cada validação que falhe (de apenas uma, a primeira encontrada)
-	 * @param modelo
-	 * @param quilometragem
-	 * @param placa
-	 * @return true se passar em todas as verificações, falso caso falhe qualquer uma delas
+	 * e mostra janelas de erro apropriadas para cada validação que falhe (de apenas uma, a primeira encontrada).
+	 * <br>
+	 * As validações são: <br>
+	 * - Campos não podem estar vazios; <br>
+	 * - <code>quilometragem</code> deve ser um valor númerico do tipo inteiro; <br>
+	 * - <code>placa</code> deve conformar com a expressão regular "([a-zA-z]{3}-?\\d{4})|([a-zA-Z]{3}\\d[a-zA-Z]\\d{2})"
+	 * que é validada para os formatos de emplacamento veícular comuns "abc-1234" ou padrão mercosul "abc1d23".
+	 * 
+	 * @param modelo modelo do veículo fornecido para verificação;
+	 * @param quilometragem valor de quilometragem fornecido para verificação;
+	 * @param placa numeração da placa fornecido para validação 
+	 * 
+	 * @return <code>true</code> se passar em todas as verificações, <code>false</code> caso falhe qualquer uma delas.
+	 * 
+	 * @see javax.swing.JOptionPane#showMessageDialog
 	 */
 	private boolean verificarDadosAutomovel(String modelo, String quilometragem, String placa) {
 		
@@ -605,10 +661,14 @@ public class IgCadastrarCliente extends JDialog {
 	}
 
 	/**
-	 * Testa a string passada por parâmetro e verifica se a mesma está no formato estipulado por regex
-	 * @param stringTestada
-	 * @param regex
-	 * @return true se a string corresponder ao formato estipulado, falso caso contrário
+	 * Testa a string passada por parâmetro e verifica se a mesma está no formato estipulado por <code>regex</code>.
+	 * 
+	 * @param stringTestada <code>String</code> a ser validada;
+	 * @param regex Expressão regular usada na validação.
+	 * 
+	 * @return <code>true</code> se a string corresponder ao formato estipulado, <code>false</code> caso contrário.
+	 * 
+	 * @see java.lang.String#matches(String)
 	 */
 	private boolean validarString(String stringTestada, String regex) {
 		if(stringTestada.matches(regex))

@@ -12,11 +12,21 @@ import javax.swing.border.TitledBorder;
 import lucas.TP1.oficina.Oficina;
 import net.miginfocom.swing.MigLayout;
 
+/**
+ * Classe que representa o menu principal do programa,
+ * onde as demais operações disponíveis podem ser escolhidas
+ * através de uma Interface Gráfica.
+ *
+ * @author Lucas Reis
+ */
 @SuppressWarnings("serial")
 public class IgMenuPrincipal extends JDialog {
 
 	/**
-	 * Create the dialog.
+	 * Contrutor da classe <code>IgMenuPrincipal</code>.
+	 *
+	 * @param oficina objeto do tipo <code>Oficina</code>
+	 * para que esta classe invoque os métodos da mesma.
 	 */
 	public IgMenuPrincipal(Oficina oficina) {
 		

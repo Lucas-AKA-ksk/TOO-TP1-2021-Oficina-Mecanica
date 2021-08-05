@@ -1,9 +1,17 @@
 package lucas.TP1.oficina.gui;
 
+import static javax.swing.JOptionPane.ERROR_MESSAGE;
+import static javax.swing.JOptionPane.showMessageDialog;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -17,8 +25,16 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
 import lucas.TP1.oficina.Oficina;
+import lucas.TP1.oficina.OrdemDeServico;
 import net.miginfocom.swing.MigLayout;
 
+/**
+ * Classe que representa o menu de relatórios,
+ * onde o usuário pode requisitar relatórios por data
+ * através de uma Interface Gráfica.
+ *
+ * @author Lucas Reis
+ */
 @SuppressWarnings("serial")
 public class IgRelatorioFinanceiro extends JDialog {
 
@@ -30,13 +46,15 @@ public class IgRelatorioFinanceiro extends JDialog {
 	private JTextField receitaServicosTextField;
 	private JTextField receitaPecasTextField;
 	private JTextField receitaTotalTextField;
+	private Oficina oficina;
 
 	/**
 	 * Create the dialog.
-	 * @param oficina 
+	 * @param oficina objeto do tipo <code>Oficina</code>
+	 * para que esta classe invoque os métodos da mesma.
 	 */
 	public IgRelatorioFinanceiro(Oficina oficina) {
-		
+		this.oficina = oficina;
 		// Titulo
 		setTitle("Ordem de serviço");
 		
@@ -65,6 +83,11 @@ public class IgRelatorioFinanceiro extends JDialog {
 				
 		// TextField de Data Inicial
 		dataInicialTextField = new JTextField();
+		dataInicialTextField.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gerarRelatorio();
+			}
+		});
 		periodoPanel.add(dataInicialTextField, "flowx,cell 1 0,alignx left");
 		dataInicialTextField.setColumns(10);
 			
@@ -76,11 +99,21 @@ public class IgRelatorioFinanceiro extends JDialog {
 			
 		// TextField de Data Final
 		dataFinalTextField = new JTextField();
+		dataFinalTextField.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gerarRelatorio();
+			}
+		});
 		periodoPanel.add(dataFinalTextField, "flowx,cell 3 0,alignx left");
 		dataFinalTextField.setColumns(10);
 			
 		// Botão Gerar Relatório
 		JButton gerarRelatorioButton = new JButton("Gerar Relatório");
+		gerarRelatorioButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gerarRelatorio();
+			}
+		});
 		gerarRelatorioButton.setMnemonic(KeyEvent.VK_G);
 		periodoPanel.add(gerarRelatorioButton, "cell 4 0");
 			
@@ -240,6 +273,11 @@ public class IgRelatorioFinanceiro extends JDialog {
 			
 		// Botão OK
 		JButton okButton = new JButton("OK");
+		okButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
 		okButton.setMnemonic(KeyEvent.VK_G);
 		okButton.setActionCommand("OK");
 		buttonPane.add(okButton);
@@ -247,9 +285,13 @@ public class IgRelatorioFinanceiro extends JDialog {
 			
 		// Botão cancelar
 		JButton cancelarButton = new JButton("Cancelar");
+		cancelarButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
 		cancelarButton.setActionCommand("Cancel");
 		buttonPane.add(cancelarButton);
-			
 		
 		// Configura a caixa de dialogo para que ela seja liberada para o sistema quando for fechada
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -261,4 +303,119 @@ public class IgRelatorioFinanceiro extends JDialog {
 		setVisible(true);
 	}
 
+	/**
+	 * Gera um relatório financeiro com base nos campos Data Inicial e Data Final.
+	 * Caso apenas Data Inicial seja preenchido, gera um relatório apenas daquela data em específico,
+	 * caso ambos os campos estejam preenchidos, gera um relatório daquele intervalo de datas. 
+	 */
+	private void gerarRelatorio() {
+		DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String dataIni = dataInicialTextField.getText(), dataFim = dataFinalTextField.getText();
+		LocalDate dataInicial, dataFinal;
+		
+		
+		if(!dataIni.isBlank()) {
+			
+			try {
+				dataInicial = LocalDate.parse(dataIni, formato);
+			} catch (DateTimeParseException e) {
+				showMessageDialog(this, "Data Inicial inválida.", "Relatório Financeiro", ERROR_MESSAGE);
+				return;
+			}
+			
+			// Se o Campo Data não estiver vazio, sera realizada uma busca no intervalo entre as datas
+			if(!dataFim.isBlank()) {
+				
+				try {
+					dataFinal = LocalDate.parse(dataFim, formato);
+				} catch (DateTimeParseException e) {
+					showMessageDialog(this, "Data Final inválida.", "Relatório Financeiro", ERROR_MESSAGE);
+					return;
+				}
+				
+				if(dataFinal.isAfter(dataInicial) || dataFinal.isEqual(dataInicial))
+					gerarRelatorio(dataInicial, dataFinal);
+				else
+					showMessageDialog(this, "Intervalo de datas inválido.", "Relatório Financeiro", ERROR_MESSAGE);
+			}
+			else {
+				gerarRelatorio(dataInicial);
+			}
+		}
+	}
+
+	/**
+	 * Gera um relatório de todos os serviços realizados e peças vendidas em uma data especifica.
+	 * Realiza uma chamada de <code>gerarRelatorio(LocalDate dataInicial, Localdate dataFinal)</code>
+	 * com a mesma data em ambos os parâmetros
+	 * 
+	 * @param data data usada para gerar o relatório.
+	 * 
+	 * @see IgRelatorioFinanceiro#gerarRelatorio(LocalDate, LocalDate)
+	 */
+	private void gerarRelatorio(LocalDate data) {
+		gerarRelatorio(data, data);
+	}
+
+	/**
+	 * Gera um relatório de todos os serviços realizados e peças vendidas em um intervalo de datas.
+	 * 
+	 * @param dataInicial data inicial do relatório;
+	 * @param dataFinal data final do relatório.
+	 */
+	private void gerarRelatorio(LocalDate dataInicial, LocalDate dataFinal) {
+		
+		DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		Double receitaServicos = 0.0, receitaPecas = 0.0;
+		DefaultTableModel servicosTM = (DefaultTableModel) servicosTable.getModel();
+		DefaultTableModel pecasTM = (DefaultTableModel) pecasTable.getModel();
+		int servicosRowCount = 0, pecasRowCount = 0;
+		
+		for(int index = 0; index < oficina.obterNumeroDeOrdensDeServico(); index++) {
+			
+			OrdemDeServico ordemDeServico =  oficina.obterOrdemDeServico(index);
+			LocalDate dataDaOrdemDeServico = LocalDate.parse(ordemDeServico.getData(), formato);
+			
+			// Se a data da Ordem de Serviço estiver entre DataInicial e DataFinal
+			if((dataDaOrdemDeServico.isEqual(dataInicial) || dataDaOrdemDeServico.isAfter(dataInicial)) && (dataDaOrdemDeServico.isEqual(dataFinal) || dataDaOrdemDeServico.isAfter(dataFinal))){
+				
+				Double valorServico, valorPecas;
+				
+				for(int indexServico = 0; indexServico < ordemDeServico.obterNumeroDeServicos(); indexServico++) {
+					
+					valorServico = ordemDeServico.obterPrecoDoServico(indexServico);
+					receitaServicos += valorServico;
+					
+					servicosTM.setValueAt(ordemDeServico.obterDescricaoDoServico(indexServico), servicosRowCount, 0);
+					servicosTM.setValueAt(valorServico, servicosRowCount, 1);
+					
+					if(servicosRowCount == servicosTM.getRowCount())
+						servicosTM.addRow(new Object [] {null,null});
+					
+					servicosRowCount++;
+				}
+				
+				for(int indexPeca = 0; indexPeca < ordemDeServico.obterNumeroDeServicos(); indexPeca++) {
+					
+					valorPecas = ordemDeServico.obterPrecoTotalDasPecas(indexPeca);
+					receitaPecas += valorPecas;
+					
+					pecasTM.setValueAt(ordemDeServico.obterDescricaoDaPeca(indexPeca), pecasRowCount, 0);
+					pecasTM.setValueAt(ordemDeServico.obterQuantidadeDePecas(indexPeca), pecasRowCount, 1);
+					pecasTM.setValueAt(ordemDeServico.obterPrecoUnitarioDaPeca(indexPeca), pecasRowCount, 2);
+					pecasTM.setValueAt(valorPecas, pecasRowCount, 3);
+					
+					if(pecasRowCount == pecasTM.getRowCount())
+						pecasTM.addRow(new Object [] {null,null,null,null});
+					
+					pecasRowCount++;
+				}
+				
+				receitaServicosTextField.setText(String.format("%.2f", receitaServicos));
+				receitaPecasTextField.setText(String.format("%.2f", receitaPecas));
+				receitaTotalTextField.setText(String.format("%.2f", receitaServicos + receitaPecas));
+			}
+				
+		}
+	}
 }
