@@ -1,7 +1,4 @@
-./bin
-./jar
-<<<<<<< HEAD
-./doc
-=======
-./doc
->>>>>>> 31fc61c ([Updt] .gitignore)
+bin
+jar
+doc
+
