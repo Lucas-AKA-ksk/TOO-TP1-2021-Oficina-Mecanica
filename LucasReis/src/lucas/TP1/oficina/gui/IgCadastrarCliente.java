@@ -326,12 +326,12 @@ public class IgCadastrarCliente extends JDialog {
 
 				if(verificarDadosCliente(cpfTextField.getText(), nomeTextField.getText(),
 						emailTextField.getText(), telefoneTextField.getText(),
-						enderecoTextArea.getText()) && !listaDeAutomoveisTemporaria.isEmpty()) {
+						enderecoTextArea.getText())/* && !listaDeAutomoveisTemporaria.isEmpty()*/) {
 					
 					if(!oficina.verificarCPFCliente(cpfTextField.getText().replaceAll("\\D", ""))) 
 						cadastrarCliente();
 						
-					new IgOrdemDeServico(oficina, cpfTextField.getText(), nomeTextField.getText(),
+					new IgOrdemDeServico(oficina, cpfTextField.getText().replaceAll("\\D", ""), nomeTextField.getText(),
 							oficina.pesquisarClientePeloCPF(cpfTextField.getText().replaceAll("\\D", "")).copiarListaDeAutomoveis());
 					dispose();
 					
